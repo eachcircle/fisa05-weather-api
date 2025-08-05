@@ -2,12 +2,17 @@ name: Update Weather in README
 
 on:
   schedule:
-    - cron: "*/2 * * * *"  # 매일 오후 3시 (UTC 기준 6시) -> 2분 마다
-  workflow_dispatch:  # 수동 실행 가능
+    - cron: "*/2 * * * *"  # 2분 마다 실행
+  workflow_dispatch: # 수동 실행 가능
 
 jobs:
   update-readme:
     runs-on: ubuntu-latest
+    
+    # KST (한국 표준시) 시간대 설정
+    env:
+      TZ: Asia/Seoul
+      
     steps:
       - name: 리포지토리 체크아웃
         uses: actions/checkout@v3
@@ -28,8 +33,8 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
           git add README.md
-          git diff --cached --exit-code || git commit -m "chore: 날씨 정보 자동 업데이트"
-          git pull origin main --rebase
-          git push
+          git diff-index --quiet HEAD || git commit -m "chore: 날씨 정보 자동 업데이트"
 
+          git push origin main --force-with-lease
